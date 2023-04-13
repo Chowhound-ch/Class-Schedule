@@ -15,5 +15,4 @@ import per.chowhound.plugin.mirai.ClassSchedule
     fun  Any.logWarn(msg : String) = ClassSchedule.logger.warning(msg)
 
     fun  Any.logError(msg : String) = ClassSchedule.logger.error(msg)
-}
 
