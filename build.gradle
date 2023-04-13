@@ -1,0 +1,36 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.7.10'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.10'
+
+    id 'net.mamoe.mirai-console' version '2.14.0'
+}
+
+group = 'per.chowhound.plugin.mirai'
+version = '0.1.0'
+
+
+repositories {
+    mavenLocal()
+    maven { url 'https://maven.aliyun.com/repository/public' }
+    mavenCentral()
+}
+
+ext {
+    MIRAI_VERSION = "2.14.0"
+    JACKSON_VERSION = "2.13.3"
+    HUTOOL_VERSION = "5.8.15"
+    HTTPCLIENT_VERSION = "4.5.14"
+
+}
+
+dependencies {
+
+
+    compileOnly("net.mamoe:mirai-core:$MIRAI_VERSION") // mirai-core 的 API
+    compileOnly("net.mamoe:mirai-console:$MIRAI_VERSION") // 后端
+    implementation("com.fasterxml.jackson.core:jackson-databind:$JACKSON_VERSION") // Jackson处理json
+    implementation("cn.hutool:hutool-all:$HUTOOL_VERSION") // Hutool工具包
+    implementation("org.apache.httpcomponents:httpclient:$HTTPCLIENT_VERSION") // HttpClient
+
+    testImplementation("net.mamoe:mirai-console-terminal:$MIRAI_VERSION") // 前端, 用于启动测试
+}
