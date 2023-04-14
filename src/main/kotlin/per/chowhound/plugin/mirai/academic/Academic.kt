@@ -12,12 +12,25 @@ import java.io.File
 import java.sql.Date
 import java.util.stream.Collectors
 
+
 /**
- * Academic公共接口
+ * @Author: Chowhound
+ * @Date: 2023/4/14 - 11:28
+ * @Description: Academic公共接口
  */
+@Suppress("unused")
 interface Academic{
+
+    val prefix: String  // 学校前缀
+
     fun refresh(username: String, password: String)
+
+    fun getSchedule(username: String): List<Schedule> = JacksonUtil.objectMapper.readValue(getDataFile(username), Array<Schedule>::class.java).toList()
+
+    fun getDataFile(username: String): File = ClassSchedule.resolveDataFile("${ClassSchedule.resolveDataPath("$prefix-$username.json")}")
+
 }
+
 
 /**
  * @Author: Chowhound
@@ -26,25 +39,25 @@ interface Academic{
  * @Description: 在线从教务系统获取课表， 对本地课表信息进行更改
  */
 @Suppress("unused")
-class HFUTAcademic: HttpBase(), Academic{
+class HFUTAcademic : HttpBase(), Academic{
+    override val prefix: String = "HFUT"
+
+
     override fun refresh(username: String, password: String){
 
-        logInfo("开始刷新hfut 学号:${username} 课表中内容...")
+        logInfo("开始刷新${prefix} 学号:${username} 课表中内容...")
 
             try {
                 //访问中间网址，获取会话cookie和加密密钥
                 val encode = DigestUtil.sha1Hex("${doGetStr(GET_SALT)}-${password}") //密码加密
 
                 //登录验证
-
-
                 val entity = StringEntity(
                     JacksonUtil.toJsonString(
                         mutableMapOf(Pair("username", username), Pair("password", encode), Pair("captcha", ""))
                     ), "UTF-8"
                 )
                 entity.setContentType("application/json")
-//                val loginRes =
                 val res = doPostJson(LOGIN_URL, entity) //登录结果
 
                 if (res["needCaptcha"].asBoolean()){ // 需要验证码
@@ -56,7 +69,11 @@ class HFUTAcademic: HttpBase(), Academic{
                 }
                 //访问我的课程表，获取课程表中lessons的id
                 val lessonIds = doGetJson( LESSON_FOR_ID )["lessonIds"]
-                //TODO 待确认lessonIds.toString()结果
+
+                if (lessonIds.isEmpty){
+                    logWarn("课表中没有课程 学号:${username}")
+                    return
+                }
 
                 //再次请求，根据lessonIds请求得到具体lesson信息
                 val entityForRes = StringEntity(
@@ -97,7 +114,7 @@ class HFUTAcademic: HttpBase(), Academic{
                     }.collect(Collectors.toList())
 
                     // 保存到本地
-                    JacksonUtil.objectMapper.writeValue(File(ClassSchedule.academicFolder + "/hfut-${username}.json"), schedules)
+                    JacksonUtil.objectMapper.writeValue(getDataFile(username), schedules)
 
                 } catch (e: Exception) {
 
@@ -115,6 +132,7 @@ class HFUTAcademic: HttpBase(), Academic{
     //抑制HTTP links are not secure警告
     @Suppress("SpellCheckingInspection", "HttpUrlsUsage")
     companion object{
+
         const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36 SLBrowser/8.0.0.3161 SLBChan/103"
         const val REFERER = "http://jxglstu.hfut.edu.cn/eams5-student/login?refer=http://jxglstu.hfut.edu.cn/eams5-student/for-std/course-table/info/152113"
         const val GET_SALT = "http://jxglstu.hfut.edu.cn/eams5-student/login-salt"
