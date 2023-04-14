@@ -1,6 +1,6 @@
 package per.chowhound.plugin.mirai.academic
 
-import java.util.Date
+import java.sql.Date
 
 
 /**
@@ -8,6 +8,7 @@ import java.util.Date
  * @Date: 2023/4/13 - 20:04
  * @Description: 课表实体类, 公共父类
  */
+@Suppress("unused")
 open class Schedule(
     /**
      * 课程名称
@@ -30,7 +31,7 @@ open class Schedule(
      */
     open var day: Int = 1,
 
-    open var date: Date = java.sql.Date(System.currentTimeMillis()),
+    open var date: Date = Date(System.currentTimeMillis()),
 
     /**
      * 开始时间, 800 即为 8:00， 1300 即为 13:00
@@ -41,22 +42,13 @@ open class Schedule(
      * 结束时间, 950 即为 9:50， 1300 即为 13:00
      */
     open var end: Int = 950
-)
-
-//data class HFUTSchedule(
-//
-//    override var name: String,
-//
-//    override var teacher: String,
-//
-//    override var room: String,
-//
-//    override var week: String,
-//
-//    override var day: Int,
-//
-//    override var start: Int,
-//
-//    override var end: Int
-//
-//) : Schedule(name, teacher, room, week, day, start, end)
+){
+    fun toMessage(): String{
+        return let{
+            val startTime = String.format("%02d", start / 100) + ":" + String.format("%02d", start % 100) // 开始时间
+            val endTime = String.format("%02d", end / 100) + ":" + String.format("%02d", end % 100)// 结束时间
+//                "${DateUtil.format(date, "MM-dd")} 周${WEEK_DAY[i]}: ${startTime} - ${endTime} ${name} ${teacher} ${room} ${week})}"
+            "\n * $startTime - $endTime $room $teacher $name $teacher"
+        }
+    }
+}

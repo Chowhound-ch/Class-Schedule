@@ -16,6 +16,7 @@ data class ClassScheduleConfig(
  * @Description:
  */
 data class User(
+    var qq: Long? = null,
     var username: String? = "username",
     var password: String? = "password",
     var school: String? = "hfut"

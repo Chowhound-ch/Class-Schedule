@@ -25,10 +25,9 @@ interface Academic{
 
     fun refresh(username: String, password: String)
 
-    fun getSchedule(username: String): List<Schedule> = JacksonUtil.objectMapper.readValue(getDataFile(username), Array<Schedule>::class.java).toList()
+    fun getSchedules(username: String): List<Schedule> = JacksonUtil.objectMapper.readValue(getDataFile(username), Array<Schedule>::class.java).toList()
 
     fun getDataFile(username: String): File = ClassSchedule.resolveDataFile("${ClassSchedule.resolveDataPath("$prefix-$username.json")}")
-
 }
 
 
