@@ -8,11 +8,11 @@ import per.chowhound.plugin.mirai.ClassSchedule
  * @Description: 日志工具类
  */
 
-    fun  Any.logDebug(msg : String) = ClassSchedule.logger.debug(msg)
 
-    fun  Any.logInfo(msg : String) = ClassSchedule.logger.info(msg)
+fun  logDebug(msg : String) = ClassSchedule.logger.debug(msg)
 
-    fun  Any.logWarn(msg : String) = ClassSchedule.logger.warning(msg)
+fun  logInfo(msg: String) = ClassSchedule.logger.info(msg)
 
-    fun  Any.logError(msg : String) = ClassSchedule.logger.error(msg)
+fun  logWarn(msg : String) = ClassSchedule.logger.warning(msg)
 
+fun  logError(msg : String) = ClassSchedule.logger.error(msg)

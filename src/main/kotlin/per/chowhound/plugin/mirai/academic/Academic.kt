@@ -29,7 +29,7 @@ interface Academic{
 class HFUTAcademic: HttpBase(), Academic{
     override fun refresh(username: String, password: String){
 
-            logInfo("开始刷新hfut 学号:${username} 课表中内容...")
+        logInfo("开始刷新hfut 学号:${username} 课表中内容...")
 
             try {
                 //访问中间网址，获取会话cookie和加密密钥
@@ -45,8 +45,15 @@ class HFUTAcademic: HttpBase(), Academic{
                 )
                 entity.setContentType("application/json")
 //                val loginRes =
-                doPostJson(LOGIN_URL, entity) //登录结果
+                val res = doPostJson(LOGIN_URL, entity) //登录结果
 
+                if (res["needCaptcha"].asBoolean()){
+                    logWarn("登录中 needCaptcha: ${res["needCaptcha"]}")
+                }
+                if (!res["result"].asBoolean()) { //登录失败
+                    logError("登录失败: ${res["message"]}")
+                    return
+                }
                 //访问我的课程表，获取课程表中lessons的id
                 val lessonIds = doGetJson( LESSON_FOR_ID )["lessonIds"]
                 //TODO 待确认lessonIds.toString()结果
@@ -82,26 +89,24 @@ class HFUTAcademic: HttpBase(), Academic{
                         }
                     }
 
+                    // 组装Schedule对象
                     val schedules = hfutScheduleList.stream().map {
                         val schedule = BeanUtil.copyProperties(it, Schedule())
                         schedule.room = classMap[it.lessonId]!!
                         return@map schedule
                     }.collect(Collectors.toList())
 
+                    // 保存到本地
                     JacksonUtil.objectMapper.writeValue(File(ClassSchedule.academicFolder + "/hfut-${username}.json"), schedules)
 
                 } catch (e: Exception) {
 
-                    "数据解析错误: ${e.message}".let {
-                        logError( it )
-                    }
+                    logError("数据解析错误: ${e.message}")
 
                     e.printStackTrace()
                 }
             } catch (e: Exception) {
-                "访问网址错误: ${e.message}".let {
-                    logError( it )
-                }
+                logError("访问网址错误: ${e.message}")
 
                 e.printStackTrace()
             }
@@ -120,6 +125,7 @@ class HFUTAcademic: HttpBase(), Academic{
         const val LESSON_FOR_ID = "http://jxglstu.hfut.edu.cn/eams5-student/for-std/course-table/get-data?bizTypeId=23&semesterId=214&dataId=152113"
     }
 
+    // region 课表数据类
     data class ClassMap(
         val id: String? = null,
         val lessonId: Long? = null,
@@ -150,4 +156,5 @@ class HFUTAcademic: HttpBase(), Academic{
             fun instance(): HFUTSchedule = HFUTSchedule().apply { this.date = Date(System.currentTimeMillis()) }
         }
     }
+    // endregion
 }
