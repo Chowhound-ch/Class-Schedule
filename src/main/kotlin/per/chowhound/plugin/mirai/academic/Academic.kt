@@ -47,7 +47,7 @@ class HFUTAcademic: HttpBase(), Academic{
 //                val loginRes =
                 val res = doPostJson(LOGIN_URL, entity) //登录结果
 
-                if (res["needCaptcha"].asBoolean()){
+                if (res["needCaptcha"].asBoolean()){ // 需要验证码
                     logWarn("登录中 needCaptcha: ${res["needCaptcha"]}")
                 }
                 if (!res["result"].asBoolean()) { //登录失败
@@ -111,8 +111,6 @@ class HFUTAcademic: HttpBase(), Academic{
                 e.printStackTrace()
             }
     }
-
-
 
     //抑制HTTP links are not secure警告
     @Suppress("SpellCheckingInspection", "HttpUrlsUsage")
