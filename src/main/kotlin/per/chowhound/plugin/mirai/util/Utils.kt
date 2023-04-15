@@ -1,7 +1,33 @@
 package per.chowhound.plugin.mirai.util
 
 import cn.hutool.core.bean.BeanUtil
+import cn.hutool.core.lang.ClassScanner
+import cn.hutool.core.lang.Filter
 import per.chowhound.plugin.mirai.ClassSchedule
+
+
+/**
+ * @Author: Chowhound
+ * @Date: 2023/4/15 - 22:55
+ * @Description:
+ */
+
+@Suppress("unused")
+object HutoolClassUtil{
+    /**
+     * 扫描包下的所有类
+     * 由于mirai的console插件加载机制，Hutool的ClassUtil.scanPackage()中使用Thread.currentThread().getContextClassLoader()
+     * 获取的类加载器并不是实际加载该插件的加载器，不能在packages中找到该插件的class
+     * 故使用ClassSchedule::class.java.classLoader获取的加载器
+     * @param packageName 包名
+     * @return 类集合
+     */
+    fun scanPackageBySuper(packageName: String, superClass: Class<*>): Set<Class<*>> {
+
+        val filter = Filter { clazz: Class<*> -> superClass.isAssignableFrom(clazz) && superClass != clazz }
+        return ClassScanner(packageName, filter).apply { this.setClassLoader(ClassSchedule::class.java.classLoader) }.scan()
+    }
+}
 
 /**
  * @Author: Chowhound

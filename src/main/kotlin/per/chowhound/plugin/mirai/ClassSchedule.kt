@@ -1,7 +1,6 @@
 package per.chowhound.plugin.mirai
 
 import cn.hutool.core.date.DateUtil
-import cn.hutool.core.util.ClassUtil
 import net.mamoe.mirai.console.command.CommandContext
 import net.mamoe.mirai.console.command.CommandManager
 import net.mamoe.mirai.console.command.RawCommand
@@ -12,11 +11,11 @@ import net.mamoe.mirai.message.data.MessageChain
 import net.mamoe.mirai.utils.info
 import per.chowhound.plugin.mirai.academic.Academic
 import per.chowhound.plugin.mirai.academic.ClassScheduleConfig
+import per.chowhound.plugin.mirai.util.HutoolClassUtil
 import per.chowhound.plugin.mirai.util.JacksonUtil
 import per.chowhound.plugin.mirai.util.Logger.logError
 import per.chowhound.plugin.mirai.util.Logger.logInfo
 import per.chowhound.plugin.mirai.util.WeekUtil
-import java.lang.StringBuilder
 import java.sql.Date
 import java.time.temporal.ChronoField
 
@@ -33,7 +32,7 @@ object ClassSchedule : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
 
 
     override fun PluginComponentStorage.onLoad() {
-        ClassUtil.scanPackageBySuper("per.chowhound.plugin.mirai.academic", Academic::class.java).forEach{
+        HutoolClassUtil.scanPackageBySuper("per.chowhound.plugin.mirai.academic", Academic::class.java).forEach{
             val instance = it.constructors[0].newInstance() as Academic
             academicMap[instance.prefix.uppercase()] = instance
         }
@@ -85,7 +84,6 @@ object ClassSchedule : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
             logInfo(this.permission.id.toString())
         }
         override suspend fun CommandContext.onCommand(args: MessageChain) {
-//        this.sender.sendMessage("Hello, world!" + args)
             val user = config!!.users?.findLast { sender.user == null || it.qq == sender.user!!.id }
             if (user == null) {
                 logInfo("未找到对应的用户 user: ${sender.user?.id}")
