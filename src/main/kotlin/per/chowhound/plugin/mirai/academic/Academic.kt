@@ -8,6 +8,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import org.apache.http.entity.StringEntity
 import per.chowhound.plugin.mirai.ClassSchedule
 import per.chowhound.plugin.mirai.util.*
+import per.chowhound.plugin.mirai.util.Logger.logError
+import per.chowhound.plugin.mirai.util.Logger.logInfo
+import per.chowhound.plugin.mirai.util.Logger.logWarn
 import java.io.File
 import java.sql.Date
 import java.util.stream.Collectors

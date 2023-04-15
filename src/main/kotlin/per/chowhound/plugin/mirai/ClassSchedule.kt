@@ -13,9 +13,9 @@ import net.mamoe.mirai.utils.info
 import per.chowhound.plugin.mirai.academic.Academic
 import per.chowhound.plugin.mirai.academic.ClassScheduleConfig
 import per.chowhound.plugin.mirai.util.JacksonUtil
+import per.chowhound.plugin.mirai.util.Logger.logError
+import per.chowhound.plugin.mirai.util.Logger.logInfo
 import per.chowhound.plugin.mirai.util.WeekUtil
-import per.chowhound.plugin.mirai.util.logError
-import per.chowhound.plugin.mirai.util.logInfo
 import java.lang.StringBuilder
 import java.sql.Date
 import java.time.temporal.ChronoField
