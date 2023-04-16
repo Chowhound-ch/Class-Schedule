@@ -111,8 +111,11 @@ object ClassSchedule : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                              else if (args.size == 2 && StrUtil.isNumeric(args[1].content)) {
                                  args[1].content.toInt()
                              }else {
-                                 // TODO 待处理 +， -
-                                 academic.getWeekIndex(user.username!!)
+                                 when(args[1].content){
+                                     "+" -> { academic.getWeekIndex(user.username!!) + 1 }
+                                     "-" -> {academic.getWeekIndex(user.username!!) - 1}
+                                     else -> academic.getWeekIndex(user.username!!)
+                                 }
                              }
                          )
                      }
