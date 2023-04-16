@@ -9,7 +9,6 @@ import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.message.data.MessageChain
 import net.mamoe.mirai.message.data.content
-import net.mamoe.mirai.utils.info
 import per.chowhound.plugin.mirai.academic.Academic
 import per.chowhound.plugin.mirai.academic.ClassScheduleConfig
 import per.chowhound.plugin.mirai.mirai.ScheduleMessages
@@ -63,9 +62,9 @@ object ClassSchedule : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
 
     }
 
-    override fun onDisable() {
-        logger.info { "ClassSchedule disabled" }
-    }
+//    override fun onDisable() {
+//        logger.info { "ClassSchedule disabled" }
+//    }
 
 
     /**

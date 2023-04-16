@@ -16,7 +16,7 @@ repositories {
 }
 
 ext {
-    MIRAI_VERSION = "2.14.0"
+    MIRAI_VERSION = "2.15.0-M1"
     JACKSON_VERSION = "2.13.3"
     HUTOOL_VERSION = "5.8.15"
     HTTPCLIENT_VERSION = "4.5.14"
