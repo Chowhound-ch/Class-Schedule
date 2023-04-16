@@ -4,7 +4,24 @@ import cn.hutool.core.bean.BeanUtil
 import cn.hutool.core.lang.ClassScanner
 import cn.hutool.core.lang.Filter
 import per.chowhound.plugin.mirai.ClassSchedule
+import java.sql.Date
+import java.time.LocalDate
 
+/**
+ * @Author: Chowhound
+ * @Date: 2023/4/16 - 15:56 
+ * @Description: [Date]的工具类
+ */
+object SqlDateUtil{
+    val TODAY: Date
+        get() {return Date.valueOf(LocalDate.now())}
+    
+    val YESTERDAY: Date
+        get() {return Date.valueOf(LocalDate.now().apply { this.minusDays(1) })}
+
+    val TOMORROW: Date
+        get() {return Date.valueOf(LocalDate.now().apply { this.plusDays(1) }) }
+}
 
 /**
  * @Author: Chowhound

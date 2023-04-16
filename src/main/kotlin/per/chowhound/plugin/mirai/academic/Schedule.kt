@@ -25,7 +25,7 @@ open class Schedule(
     /**
      * 周次
      */
-    open var week: String = "周次",
+    open var week: Int = 1,
     /**
      * 每周的第几天, 1-7
      */

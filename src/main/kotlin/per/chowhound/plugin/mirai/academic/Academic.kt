@@ -1,5 +1,7 @@
 package per.chowhound.plugin.mirai.academic
 
+import cn.hutool.core.date.DateUnit
+import cn.hutool.core.date.DateUtil
 import cn.hutool.crypto.digest.DigestUtil
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -11,7 +13,11 @@ import per.chowhound.plugin.mirai.util.*
 import per.chowhound.plugin.mirai.util.Logger.logError
 import per.chowhound.plugin.mirai.util.Logger.logInfo
 import per.chowhound.plugin.mirai.util.Logger.logWarn
+import per.chowhound.plugin.mirai.util.SqlDateUtil.TODAY
+import per.chowhound.plugin.mirai.util.SqlDateUtil.TOMORROW
+import per.chowhound.plugin.mirai.util.SqlDateUtil.YESTERDAY
 import java.io.File
+import java.io.FileNotFoundException
 import java.sql.Date
 import java.util.stream.Collectors
 
@@ -26,12 +32,95 @@ interface Academic{
 
     val prefix: String  // 学校前缀
 
+    /**
+     * 刷新课表本地数据，没有则创建
+     */
     fun refresh(username: String, password: String)
 
-    fun getSchedules(username: String): List<Schedule> = JacksonUtil.objectMapper.readValue(getDataFile(username), Array<Schedule>::class.java).toList()
+    /**
+     * 获取全部本地课表
+     */
+    fun getSchedules(username: String): List<Schedule> = try {
+        JacksonUtil.objectMapper.readValue(getDataFile(username), Array<Schedule>::class.java).toList()
+    } catch (e: FileNotFoundException){ emptyList() }
 
+    /**
+     * 根据周次查课表
+     */
+    fun getSchedulesByWeek(username: String, weekIndex: Int? = null): List<Schedule> = (weekIndex ?:getWeekIndex(username)).let { index ->
+        getSchedules(username).stream()
+            .filter{ it.week == index }
+            .toList()
+    }
+    /**
+     * 根据日期查课表
+     */
+    fun getSchedulesByDate(username: String, date: Date? = null): List<Schedule> = (date ?: TODAY).let { day ->
+        getSchedules(username).stream()
+            .filter{ it.date == day }
+            .toList()
+    }
+
+
+    /**
+     * 获取当前周次
+     */
+    fun getWeekIndex(username: String): Int{
+        val today = TODAY
+        // 当前周次
+        val gap: Int = DateUtil.between(getFirstDate(username),today , DateUnit.WEEK, false).toInt()
+        if (gap <= 0){
+            logInfo("当前尚未开学 username: $username")
+        }else if (today.after(getLastDate(username))){
+            logInfo("当前课程已经全部结课 username: $username")
+        }
+        return gap
+    }
+
+    fun getThisWeek(username: String): List<Schedule>{
+        return getSchedulesByWeek(username, getWeekIndex(username))
+    }
+    fun getNextWeek(username: String): List<Schedule>{
+        return getSchedulesByWeek(username, getWeekIndex(username) + 1)
+    }
+    fun getLastWeek(username: String): List<Schedule>{
+        return getSchedulesByWeek(username, getWeekIndex(username) - 1)
+    }
+
+    fun getThisDay(username: String): List<Schedule>{
+        return getSchedulesByDate(username, TODAY)
+    }
+    fun getNextDay(username: String): List<Schedule>{
+        return getSchedulesByDate(username, TOMORROW)
+    }
+    fun getLastDay(username: String): List<Schedule>{
+        return getSchedulesByDate(username, YESTERDAY)
+    }
+
+    /**
+     * 获取第一节课的date
+     */
+    fun getFirstDate(username: String): Date? = getSchedules(username).minByOrNull { it.date }?.date
+
+    /**
+     * 获取最后一节可的date
+     */
+    fun getLastDate(username: String): Date? = getSchedules(username).maxByOrNull { it.date }?.date
+
+
+
+    /**
+     * 获取该用户课表的数据文件的[File]对象
+     */
     fun getDataFile(username: String): File = ClassSchedule.resolveDataFile("${ClassSchedule.resolveDataPath("$prefix-$username.json")}")
 }
+
+/**
+ * @Author: Chowhound
+ * @Date: 2023/4/16 - 15:36
+ * @Description:TODO scheduleList集合，在[Academic]中对此对象进行操作，避免大量读取磁盘
+ */
+class Schedules (scheduleList: List<Schedule>): ArrayList<Schedule>(scheduleList)
 
 
 /**
