@@ -21,6 +21,10 @@ object SqlDateUtil{
 
     val TOMORROW: Date
         get() {return Date.valueOf(LocalDate.now().apply { this.plusDays(1) }) }
+
+
+    // 获取当天加上int天的日期
+    fun getDateReact(int: Int? =null): Date = Date.valueOf(LocalDate.now().apply { this.minusDays(int?.toLong() ?: 1L) })
 }
 
 /**

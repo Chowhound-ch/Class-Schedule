@@ -18,9 +18,7 @@ import per.chowhound.plugin.mirai.util.JacksonUtil
 import per.chowhound.plugin.mirai.util.Logger.logError
 import per.chowhound.plugin.mirai.util.Logger.logInfo
 import per.chowhound.plugin.mirai.util.Logger.logWarn
-import per.chowhound.plugin.mirai.util.SqlDateUtil.TODAY
-import per.chowhound.plugin.mirai.util.SqlDateUtil.TOMORROW
-import per.chowhound.plugin.mirai.util.SqlDateUtil.YESTERDAY
+import per.chowhound.plugin.mirai.util.SqlDateUtil
 
 /**
  * @Author: Chowhound
@@ -102,40 +100,34 @@ object ClassSchedule : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                      sender.sendMessage("未找到对应的学校 school: ${user.school?.uppercase()}")
                      return
                  }
+                 val schedules = academic.getSchedules(user.username!!)
 
+                 // 获取符号对应的数字
+                 fun getSymbolCode(str: String) = when(str){
+                     "+" -> 1
+                     "-" -> -1
+                     else -> 0
+                 }
+                 // 解析参数。并获取对应课表
                  val scheduleList = when(args[0].content.uppercase()){
                      "W" -> { // 某一周课表
-                         academic.getSchedulesByWeek(
-                             user.username!!,
-                             if (args.size == 1) {  null  }
-                             else if (args.size == 2 && StrUtil.isNumeric(args[1].content)) {
-                                 args[1].content.toInt()
-                             }else {
-                                 when(args[1].content){
-                                     "+" -> { academic.getWeekIndex(user.username!!) + 1 }
-                                     "-" -> {academic.getWeekIndex(user.username!!) - 1}
-                                     else -> academic.getWeekIndex(user.username!!)
-                                 }
+                         val weekIndex = args.getOrNull(1)?.run {
+                             if (StrUtil.isNumeric(this.content)) { // 如果是数字,则直接返回即为周次
+                                 return@run this.content.toInt()
+                             }else{ // 如果是符号,则返回周次+符号对应的数字 由fun getSymbolCode(str: String)获取
+                                 return@run schedules.getWeekIndex() + getSymbolCode(this.content)
                              }
-                         )
+                         }
+                         schedules.getByWeek(weekIndex)
                      }
                      "D" -> {
-                         academic.getSchedulesByDate(
-                             user.username!!,
-                             if (args.size == 1) {  null  }
-                             else {
-                                 when(args[1].content){
-                                     "+" -> TOMORROW
-                                     "-" -> YESTERDAY
-                                     else -> TODAY
-                                 }
-                             }
-                         )
+                         val date = args.getOrNull(1)
+                             ?.run { SqlDateUtil.getDateReact(getSymbolCode(this.content)) }
+                         schedules.getByDate(date)
                      }
 
                      else -> { emptyList() }
                  }
-
 
                  ScheduleMessages.buildMsg(scheduleList).forEach{ sender.sendMessage(it)}
              }else{
